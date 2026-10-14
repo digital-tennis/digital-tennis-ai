@@ -1,0 +1,8 @@
+{
+  "name": "DigitalTennis.AI.StandaloneChecks",
+  "references": ["DigitalTennis.AI"],
+  "includePlatforms": ["Editor"],
+  "defineConstraints": ["DIGITAL_TENNIS_AI_STANDALONE_CHECKS"],
+  "autoReferenced": false,
+  "noEngineReferences": true
+}
