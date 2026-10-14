@@ -1,0 +1,9 @@
+{
+  "name": "com.digital-tennis.ai",
+  "version": "0.1.0",
+  "displayName": "Digital Tennis AI",
+  "description": "Deterministic standalone C# tennis opponent with easy, medium and hard policies.",
+  "unity": "6000.3",
+  "author": { "name": "Digital Tennis", "url": "https://github.com/digital-tennis" },
+  "repository": { "type": "git", "url": "https://github.com/digital-tennis/digital-tennis-ai.git" }
+}
