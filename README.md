@@ -1,6 +1,6 @@
 # Digital Tennis 독립 AI 플레이어
 
-`AiSkillPolicy.ShouldActivate`는 캐릭터 스킬 사용 시점을 순수 함수로 판단합니다. 유효 리턴 직후 Easy는 3개, Medium은 2개, Hard는 1개부터 사용합니다. 온라인·일시정지·활성 효과 중·무효 입력에는 사용하지 않습니다. 실제 게이지 차감·경기 규칙·연출은 게임 어댑터가 검증하고 실행합니다.
+`AiSkillPolicy.ShouldActivate`는 캐릭터 스킬 사용 시점을 순수 함수로 판단합니다. 유효 리턴 직후 주입한 `SkillStock` 이상일 때 사용합니다. 기본 CSV는 Easy=3개, Medium=2개, Hard=1개입니다. 온라인·일시정지·활성 효과 중·무효 입력에는 사용하지 않습니다. 실제 게이지 차감·경기 규칙·연출은 게임 어댑터가 검증하고 실행합니다.
 
 Unity에 의존하지 않는 C# AI입니다. 게임 상태를 읽고 **이동 목표와 라켓 입력**을 반환합니다. 난이도 상·중·하, 착지/타격 위치 예측, 재현 가능한 seed와 단독 검증을 제공합니다. 공·점수·캐릭터를 직접 변경하지 않습니다.
 
@@ -16,7 +16,7 @@ bash tools/check.sh
 dotnet run --project tests/DigitalTennis.AI.Checks.csproj --configuration Release
 ```
 
-23개 검증 묶음이 예측 수치, 난이도 반응 경계, 같은 입력·seed의 동일 출력, 공별 1회 표본과 타격, 온라인·일시정지·종료·잘못된 입력을 확인합니다. GitHub Actions도 같은 명령을 실행합니다. 전체 성공은 `ALL 23 CHECKS PASSED`입니다. `bin/`, `obj/`, `.work/`는 커밋하지 않습니다.
+25개 검증 묶음이 예측 수치, 난이도 반응 경계, 같은 입력·seed의 동일 출력, 공별 1회 표본과 타격, 온라인·일시정지·종료·잘못된 입력을 확인합니다. GitHub Actions도 같은 명령을 실행합니다. 전체 성공은 `ALL 25 CHECKS PASSED`입니다. `bin/`, `obj/`, `.work/`는 커밋하지 않습니다.
 
 ## 입력과 출력: 초보 개발자용 문제 설명
 
@@ -31,12 +31,14 @@ dotnet run --project tests/DigitalTennis.AI.Checks.csproj --configuration Releas
 | Phase | 서브 대기/비행/랠리/득점/종료/일시정지 |
 | BounceCount / IncomingBallId | 현재 발사의 바운스 횟수, 유일한 발사 ID. 게임은 `(rallyId << 32) | shotId` 사용 |
 | HasBall / IsStopped / IsOnline | 공의 존재·정지와 온라인 실행 여부 |
-| Gravity / Radius / BounceRestitution / SpeedRetention | 게임과 같은 물리 계수. 기본 9.81, 0.12, 0.7, 0.96 |
+| Gravity / Radius / BounceRestitution / SpeedRetention | 게임에서 반드시 전달하는 실제 물리 계수. 생략하면 잘못된 상태로 거부 |
 
-출력 `AiDecision`에는 `MoveTarget`, `ShouldSwing`, `Stroke`, `Power01`, `AimX`, `AimZ`, `Status`가 있습니다. 목표는 자기 코트 안으로 제한됩니다. 게임은 목표를 향해 최대 5 m/s로 이동시키고, `ShouldSwing=true`일 때 **일반 RacketInput 타격 경계**에 전달합니다. 게임은 높이·거리·권위를 다시 검사합니다. `ShouldSwing=false`이면 공을 발사하지 않습니다.
+출력 `AiDecision`에는 `MoveTarget`, `ShouldSwing`, `Stroke`, `Power01`, `AimX`, `AimZ`, `Status`가 있습니다. 목표는 자기 코트 안으로 제한됩니다. 게임은 목표를 향해 CSV와 캐릭터 상태로 계산한 최대 속도로 이동시키고, `ShouldSwing=true`일 때 **일반 RacketInput 타격 경계**에 전달합니다. 게임은 높이·거리·권위를 다시 검사합니다. `ShouldSwing=false`이면 공을 발사하지 않습니다.
 
 ```csharp
-var ai = new DigitalTennis.AI.AiPolicy(Difficulty.Medium, seed: 42);
+// settings: 게임이 CSV에서 검증해 만든 DifficultySettings
+// tuning: 같은 CSV의 이동·타격·샷 값으로 만든 불변 AiTuning
+var ai = new DigitalTennis.AI.AiPolicy(settings, tuning, seed: 42);
 // 같은 ai 인스턴스를 계속 보관합니다. 매 프레임 새로 만들지 않습니다.
 AiDecision decision = ai.Decide(snapshot);
 // decision.MoveTarget으로 제한 속도 이동
@@ -45,7 +47,7 @@ AiDecision decision = ai.Decide(snapshot);
 
 `Runtime`은 UnityEngine·GameObject·Transform과 게임 어셈블리를 참조하지 않습니다. Unity asmdef도 `noEngineReferences=true`입니다. 게임은 Git SHA로 고정한 UPM 의존성으로 이 저장소를 사용하며 정책을 복사하지 않습니다. 단독 검증 코드의 asmdef는 기본 Unity 컴파일에서 제외합니다.
 
-## 난이도 정책
+## 난이도 정책 (아래 표는 기본 CSV 값)
 
 | 난이도 | 반응 지연 | x/z 각각의 목표 오차 | 공별 타격 시도 확률 | 파워 상한 |
 | --- | --- | --- | --- | --- |
@@ -55,7 +57,7 @@ AiDecision decision = ai.Decide(snapshot);
 
 상대의 새 공이 들어올 때 x/z 오차와 시도 여부를 **각각 한 번** 표본으로 뽑습니다. xorshift32를 사용해 .NET/Unity의 System.Random 구현 차이와 전역 난수를 피합니다. 같은 seed·상태 스트림이면 같은 결과를 냅니다. seed=0도 정해진 비영점 상태로 재현합니다. 반응은 Tick/DeltaTime 누적으로 계산하며 잠들거나 스레드를 멈추지 않습니다.
 
-반응 시간이 지난 뒤 `Rally`, 자신의 코트, 높이 0.2~2.5 m, 코트 평면 거리 1.5 m 이내인 첫 순간에 최대 한 번 타격합니다. 실수 표본이면 그 공에는 타격하지 않습니다. 멈춘 공·서브 대기·일시정지·득점·승리·온라인 상태에서는 타격과 반응 타이머를 진행하지 않습니다. 같은 Tick을 다시 호출해도 반응 시간을 추가하지 않습니다. 난이도 변경은 새 정책과 새 경기로 시작해 이전 공의 표본을 섞지 않습니다.
+반응 시간이 지난 뒤 `Rally`, 자신의 코트, CSV의 타격 높이와 캐릭터의 현재 타격 범위 안에 들어온 첫 순간에 최대 한 번 타격합니다. 실수 표본이면 그 공에는 타격하지 않습니다. 멈춘 공·서브 대기·일시정지·득점·승리·온라인 상태에서는 타격과 반응 타이머를 진행하지 않습니다. 같은 Tick을 다시 호출해도 반응 시간을 추가하지 않습니다. 난이도 변경은 새 정책과 새 경기로 시작해 이전 공의 표본을 섞지 않습니다.
 
 ## 예측과 샷 선택
 
@@ -69,7 +71,7 @@ AiDecision decision = ai.Decide(snapshot);
 
 ## 검증 기록 (2026-10-15)
 
-.NET 10.0.105에서 **23/23 묶음 통과**. 각 난이도에서 seed 42로 새 공 10,000개를 표본화한 시도 비율은 하 **0.6577**, 중 **0.8535**, 상 **0.9498**이었습니다. 이는 타격 시도 난수의 관측값이며 경기 승률이 아닙니다. 각 묶음은 같은 공에 대한 중복 타격·중복 표본도 검사합니다.
+.NET 10.0.105에서 **25/25 묶음 통과**. 각 난이도에서 seed 42로 새 공 10,000개를 표본화한 시도 비율은 하 **0.6577**, 중 **0.8535**, 상 **0.9498**이었습니다. 이는 타격 시도 난수의 관측값이며 경기 승률이 아닙니다. 각 묶음은 같은 공에 대한 중복 타격·중복 표본도 검사합니다.
 
 독립 수치 테스트와 실제 Unity 게임 플레이 증거는 구분합니다. 실제 IMU/Windows 컨트롤러로 세 난이도를 완주하는 AT-11은 하드웨어 검증이 별도로 필요합니다. 게임 연동 결과는 [게임 저장소](https://github.com/digital-tennis/digital-tennis-game)의 1인 플레이 문서에서 확인합니다.
 
