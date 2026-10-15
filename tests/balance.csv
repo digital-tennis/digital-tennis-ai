@@ -1,0 +1,76 @@
+key,value,unit,description
+physics.gravity,9.81,m/s2,중력
+physics.radius,0.12,m,공 반지름
+physics.bounce,0.7,ratio,바운스 반발력
+physics.ground_retention,0.96,ratio,바운스 후 수평 속도
+physics.net_bounce,0.35,ratio,네트 반발력
+physics.rest_speed,0.35,m/s,정지 판정 속도
+shot.base_speed,10,m/s,최소 샷 속도
+shot.power_speed,12,m/s,입력 세기에 따른 추가 속도
+shot.yaw,25,deg,좌우 조준 최대 각도
+shot.pitch,20,deg,기본 발사 각도
+shot.pitch_aim,10,deg,상하 조준 각도
+shot.default_power,0.35,ratio,키보드 기본 세기
+smash.flight,0.5,s,스매시 기본 비행 시간
+smash.aim_width,3,m,스매시 좌우 조준 폭
+smash.target_width,3.8,m,스매시 착지 좌우 한계
+smash.target_depth,7,m,스매시 착지 깊이
+smash.aim_depth,2,m,스매시 깊이 조준 폭
+lob.horizontal,0.6,ratio,로브 좌우 속도 배율
+lob.lift,9,m/s,로브 상승 속도
+lob.aim_lift,2,m/s,로브 상하 조준
+lob.forward,0.65,ratio,로브 전진 속도 배율
+slice.lift,0.85,ratio,슬라이스 상승 배율
+slice.forward,0.92,ratio,슬라이스 전진 배율
+volley.lift,0.85,ratio,발리 상승 배율
+volley.forward,0.95,ratio,발리 전진 배율
+hit.reach,1.5,m,기본 수평 타격 범위
+hit.min_height,0.2,m,최소 타격 높이
+hit.max_height,2.5,m,최대 타격 높이
+hit.smash_height,1.75,m,스매시 최소 높이
+hit.net_gap,0.2,m,네트 근처 타격 제외 거리
+move.speed,5,m/s,기본 이동 속도
+move.home_depth,8,m,복귀 위치 깊이
+move.min_depth,0.8,m,네트 앞 이동 한계
+move.contact_height,1,m,자동 이동 목표 타격 높이
+serve.offset,1.5,m,서브 좌우 위치
+serve.height,2.2,m,서브 시작 높이
+serve.depth,12.6,m,서브 베이스라인 뒤 위치
+serve.target_depth,4,m,서비스 박스 착지 목표
+serve.flight,1.2,s,기본 서브 비행 시간
+serve.receiver_depth,9,m,리시버 대기 위치
+match.next_point_delay,1.25,s,득점 후 다음 서브 준비 시간
+match.auto_serve_delay,0.75,s,연습 자동 서브 대기
+rating.center,70,rating,평균 능력치 기준
+rating.scale,0.004,ratio/rating,능력치 1점당 배율 변화
+energy.move_floor,0.9,ratio,체력 0일 때 이동 배율
+energy.shot_floor,0.96,ratio,체력 0일 때 샷 배율
+energy.hit_cost,4,energy,타격 체력 비용
+energy.hit_factor,1.2,ratio,타격 소모 기본 계수
+energy.hit_stamina,0.006,ratio/rating,체력 능력치의 타격 비용 감소
+energy.move_cost,0.8,energy/m,이동 체력 비용
+energy.move_stamina,0.005,energy/m/rating,체력 능력치의 이동 비용 감소
+energy.recovery,5,energy/s,대기 중 기본 회복
+energy.recovery_stamina,0.05,energy/s/rating,체력 능력치별 회복 보너스
+meter.fast_ball,18,m/s,빠른 공 수비 보너스 기준
+meter.fast_bonus,4,gauge,빠른 공 수비 보너스
+meter.serve_gain,0.5,ratio,유효 서브 게이지 배율
+recovery.speed,5,m/s,볼보이 속도
+recovery.pickup,0.65,s,공을 줍는 시간
+ai.target_width,2.5,m,AI 코너 조준 위치
+ai.target_depth,8,m,AI 착지 목표 깊이
+ai.easy.reaction,0.35,s,easy 반응 시간
+ai.easy.error,1.5,m,easy 목표 위치 오차
+ai.easy.probability,0.65,ratio,easy 스윙 시도 확률
+ai.easy.max_power,0.5,ratio,easy 최대 입력 세기
+ai.easy.skill_stock,3,stock,easy 스킬을 사용할 최소 사용권
+ai.medium.reaction,0.2,s,medium 반응 시간
+ai.medium.error,0.8,m,medium 목표 위치 오차
+ai.medium.probability,0.85,ratio,medium 스윙 시도 확률
+ai.medium.max_power,0.65,ratio,medium 최대 입력 세기
+ai.medium.skill_stock,2,stock,medium 스킬을 사용할 최소 사용권
+ai.hard.reaction,0.1,s,hard 반응 시간
+ai.hard.error,0.25,m,hard 목표 위치 오차
+ai.hard.probability,0.95,ratio,hard 스윙 시도 확률
+ai.hard.max_power,0.8,ratio,hard 최대 입력 세기
+ai.hard.skill_stock,1,stock,hard 스킬을 사용할 최소 사용권

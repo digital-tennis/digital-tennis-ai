@@ -21,17 +21,16 @@ namespace DigitalTennis.AI
     public readonly struct DifficultySettings
     {
         public readonly float ReactionSeconds, PositionError, SwingProbability, MaxPower;
-        private DifficultySettings(float reaction, float error, float probability, float power)
-        { ReactionSeconds = reaction; PositionError = error; SwingProbability = probability; MaxPower = power; }
-        public static DifficultySettings For(Difficulty difficulty)
+        public readonly Difficulty Difficulty;
+        public readonly int SkillStock;
+        public DifficultySettings(Difficulty difficulty, float reaction, float error, float probability, float power, int skillStock)
         {
-            switch (difficulty)
-            {
-                case Difficulty.Easy: return new DifficultySettings(0.35f, 1.5f, 0.65f, 0.50f);
-                case Difficulty.Medium: return new DifficultySettings(0.20f, 0.8f, 0.85f, 0.65f);
-                case Difficulty.Hard: return new DifficultySettings(0.10f, 0.25f, 0.95f, 0.80f);
-                default: throw new ArgumentOutOfRangeException(nameof(difficulty));
-            }
+            if (!Enum.IsDefined(typeof(Difficulty),difficulty) || !Numbers.Finite(reaction) || reaction < 0 || reaction > 1 ||
+                !Numbers.Finite(error) || error < 0 || error > 3 || !Numbers.Finite(probability) || probability < 0 || probability > 1 ||
+                !Numbers.Finite(power) || power < 0 || power > 1 || skillStock < 1 || skillStock > 3)
+                throw new ArgumentOutOfRangeException(nameof(difficulty), "Invalid difficulty settings.");
+            Difficulty = difficulty; ReactionSeconds = reaction; PositionError = error; SwingProbability = probability;
+            MaxPower = power; SkillStock = skillStock;
         }
     }
 
@@ -46,18 +45,18 @@ namespace DigitalTennis.AI
         public readonly int BounceCount;
         public readonly ulong IncomingBallId;
         public readonly bool HasBall, IsStopped, IsOnline;
-        public readonly float Gravity, Radius, BounceRestitution, SpeedRetention;
+        public readonly float Gravity, Radius, BounceRestitution, SpeedRetention, Reach, ShotMultiplier;
 
         public AiState(long tick, float dt, int playerId, Vec3 playerPosition, Vec3 opponentPosition,
             Vec3 ballPosition, Vec3 ballVelocity, AiPhase phase, int bounceCount, ulong incomingBallId,
             int lastHitter, bool hasBall = true, bool isStopped = false, bool isOnline = false,
-            float gravity = 9.81f, float radius = 0.12f, float bounceRestitution = 0.7f, float speedRetention = 0.96f)
+            float gravity = float.NaN, float radius = float.NaN, float bounceRestitution = float.NaN, float speedRetention = float.NaN, float reach = 0, float shotMultiplier = 1)
         {
             Tick = tick; DeltaTime = dt; PlayerId = playerId; PlayerPosition = playerPosition;
             OpponentPosition = opponentPosition; BallPosition = ballPosition; BallVelocity = ballVelocity;
             Phase = phase; BounceCount = bounceCount; IncomingBallId = incomingBallId; LastHitter = lastHitter;
             HasBall = hasBall; IsStopped = isStopped; IsOnline = isOnline; Gravity = gravity; Radius = radius;
-            BounceRestitution = bounceRestitution; SpeedRetention = speedRetention;
+            BounceRestitution = bounceRestitution; SpeedRetention = speedRetention; Reach=reach;ShotMultiplier=shotMultiplier;
         }
         public bool IsValid => Tick >= 0 && Numbers.Finite(DeltaTime) && DeltaTime > 0f && DeltaTime <= 1f &&
             (PlayerId == 0 || PlayerId == 1) && (LastHitter == 0 || LastHitter == 1) &&
@@ -65,6 +64,7 @@ namespace DigitalTennis.AI
             Enum.IsDefined(typeof(AiPhase), Phase) && BounceCount >= 0 && BounceCount <= 2 &&
             Numbers.Finite(Gravity) && Gravity > 0f && Numbers.Finite(Radius) && Radius > 0f &&
             Numbers.Finite(BounceRestitution) && BounceRestitution >= 0f && BounceRestitution <= 1f &&
+            Numbers.Finite(Reach) && Reach >= 0 && Numbers.Finite(ShotMultiplier) && ShotMultiplier > 0 &&
             Numbers.Finite(SpeedRetention) && SpeedRetention >= 0f && SpeedRetention <= 1f;
     }
 
