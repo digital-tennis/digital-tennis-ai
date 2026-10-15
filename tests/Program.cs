@@ -36,6 +36,17 @@ static class Program
     }
     static void Main()
     {
+        Check("character skill timing stays deterministic and inactive outside a valid returned rally",()=>{
+            Require(!AiSkillPolicy.ShouldActivate(State(),Difficulty.Easy,2,0,true),"easy saves three stocks");
+            Require(AiSkillPolicy.ShouldActivate(State(),Difficulty.Easy,3,0,true),"easy uses at cap");
+            Require(AiSkillPolicy.ShouldActivate(State(),Difficulty.Medium,2,0,true),"medium two stocks");
+            Require(AiSkillPolicy.ShouldActivate(State(),Difficulty.Hard,1,0,true),"hard one stock");
+            foreach(var stock in new[]{0,4}) Require(!AiSkillPolicy.ShouldActivate(State(),Difficulty.Hard,stock,0,true),"stock bounds");
+            Require(!AiSkillPolicy.ShouldActivate(State(online:true),Difficulty.Hard,3,0,true),"online off");
+            Require(!AiSkillPolicy.ShouldActivate(State(phase:AiPhase.Paused),Difficulty.Hard,3,0,true),"pause off");
+            Require(!AiSkillPolicy.ShouldActivate(State(),Difficulty.Hard,3,1,true),"no active buff stacking");
+            Require(!AiSkillPolicy.ShouldActivate(State(),Difficulty.Hard,3,0,false),"no miss charging activation");
+        });
         Check("independent numerical landing example",()=>{
             var p=BallPrediction.Landing(new Vec3(0,1,0),new Vec3(2,0,4));
             Require(p.Valid,"valid root");Near(p.TimeToBounce,.451524f,.0001f);Near(p.Position.X,.903047f);Near(p.Position.Z,1.806095f);
