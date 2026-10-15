@@ -85,3 +85,9 @@ AiDecision decision = ai.Decide(snapshot);
 | .github/workflows/checks.yml | 독립 CI |
 
 [전체 AI 과제](https://github.com/digital-tennis/digital-tennis-docs/blob/main/docs/products/digital-tennis-ai.md), [12일 WBS](https://github.com/digital-tennis/digital-tennis-docs/blob/main/docs/planning/wbs.md)를 함께 참고합니다. PR은 스쿼시 병합하고 병합한 원격·로컬 브랜치를 삭제합니다. 라이선스는 팀이 코드와 자산 조건을 검토한 뒤 선택합니다.
+
+## CSV 기반 설정 주입
+
+AI 런타임은 기본 난이도 수치나 파일 경로를 갖지 않습니다. 게임이 검증한 `gameplay.csv`의 설정으로 `DifficultySettings`와 `AiTuning`을 만들고 `new AiPolicy(settings, tuning, seed)`로 전달합니다. `AiState`에는 실제 공 물리 계수와 캐릭터의 현재 타격 범위·샷 배율을 전달해야 합니다. 미전달 물리는 NaN으로 거부됩니다.
+
+조절 항목은 반응 시간·위치 오차·스윙 확률·최대 세기·스킬 사용권 임계값, 이동 목표, 타격 높이·범위, 조준 위치와 게임의 공통 샷 속도·각도입니다. 서브 대기에서 설정 변경 시 게임이 정책을 새 세션으로 교체합니다. 기본 생성자와 `DifficultySettings.For`는 제거되었습니다. `tests/balance.csv`는 독립 검사 전용 데이터이며 실제 제품의 배포 설정은 게임 저장소에서 관리합니다.
