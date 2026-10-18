@@ -1,8 +1,8 @@
 {
   "name": "com.digital-tennis.ai",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "Digital Tennis AI",
-  "description": "Deterministic standalone C# tennis opponent with easy, medium and hard policies.",
+  "description": "Standalone deterministic tennis execution and an exported PPO shot-placement model.",
   "unity": "6000.3",
   "author": {
     "name": "Digital Tennis",

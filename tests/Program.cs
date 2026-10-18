@@ -4,6 +4,7 @@ using System.Linq;
 using System.IO;
 using System.Globalization;
 using DigitalTennis.AI;
+using System.Text.Json;
 
 static class Program
 {
@@ -185,6 +186,29 @@ static class Program
             var landing=BallPrediction.Landing(new Vec3(0,1,6),new Vec3((float)(-Math.Sin(yaw)*Math.Cos(pitch)*speed),(float)(Math.Sin(pitch)*speed),(float)(-Math.Cos(yaw)*Math.Cos(pitch)*speed)),Values["physics.gravity"],Values["physics.radius"]);
             Require(landing.Valid,"custom landing");Near(landing.Position.Z,-8,.01f);Near(landing.Position.X,-2.5f,.01f);
             Require(!AiSkillPolicy.ShouldActivate(State(),settings,1,0,true),"injected skill threshold");
+        });
+        PpoModelData Model() => JsonSerializer.Deserialize<PpoModelData>(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"placement-ppo.json")),new JsonSerializerOptions{IncludeFields=true});
+        Check("PPO portable actor agrees with SB3 on 64 unseen states", () => {
+            var actor=new LearnedShotSelector(Model());
+            using var report=JsonDocument.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"placement-validation.json")));
+            foreach(var row in report.RootElement.GetProperty("portableCases").EnumerateArray())
+                Require(actor.Predict(row.GetProperty("observation").EnumerateArray().Select(x=>x.GetSingle()).ToArray())==row.GetProperty("action").GetInt32(),"PPO parity");
+            Require(report.RootElement.GetProperty("trainedReward").GetDouble()>report.RootElement.GetProperty("randomReward").GetDouble()+.1,"held-out improvement");
+        });
+        Check("PPO weights are immutable and reject corrupt shapes/non-finite values", () => {
+            var data=Model();var actor=new LearnedShotSelector(data);var obs=LearnedShotSelector.Observe(State());int expected=actor.Predict(obs);
+            Array.Fill(data.w1,0);Require(actor.Predict(obs)==expected,"actor shared mutable export data");
+            data=Model();data.w1[0]=float.NaN;bool rejected=false;try{new LearnedShotSelector(data);}catch(ArgumentException){rejected=true;}Require(rejected,"NaN weights accepted");
+            data=Model();data.inputSize++;rejected=false;try{new LearnedShotSelector(data);}catch(ArgumentException){rejected=true;}Require(rejected,"schema accepted");
+        });
+        Check("PPO observes mirrored court consistently and does not run while inactive", () => {
+            var a=LearnedShotSelector.Observe(State());
+            var mirrored=State(player:0,ball:new Vec3(0,1,-6),position:new Vec3(0,.85f,-6),velocity:new Vec3(0,2,-12),opponent:new Vec3(-1,.85f,8));
+            Require(a.SequenceEqual(LearnedShotSelector.Observe(mirrored)),"canonical coordinates");
+            var selector=new LearnedShotSelector(Model());var policy=new AiPolicy(Settings(Difficulty.Hard),Tuning,TryingSeed(Difficulty.Hard),selector);
+            policy.Decide(State(phase:AiPhase.Paused));policy.Decide(State(online:true));policy.Decide(State(phase:AiPhase.WaitServe));Require(selector.Decisions==0,"inactive inference");
+            var decision=ReachReaction(policy);Require(decision.ShouldSwing&&selector.Decisions==1,"learned return");
+            policy.Decide(State(tick:100));Require(selector.Decisions==1,"duplicate inference for one ball");
         });
         Console.WriteLine($"ALL {passed} CHECKS PASSED");
     }
