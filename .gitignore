@@ -25,3 +25,8 @@ TestResults/
 TestResults.meta
 coverage/
 *.coverage
+
+__pycache__/
+*.py[cod]
+*.zip
+*.zip.meta

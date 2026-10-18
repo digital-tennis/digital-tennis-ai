@@ -1,0 +1,7 @@
+name,width_factor,depth_factor
+deep_left,-1,1
+deep_center,0,1
+deep_right,1,1
+short_left,-1,0.6
+short_center,0,0.6
+short_right,1,0.6

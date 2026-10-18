@@ -20,12 +20,14 @@ namespace DigitalTennis.AI
         public Vec3 PositionError { get; private set; }
 
         private readonly AiTuning tuning;
-        public AiPolicy(DifficultySettings settings, AiTuning tuning, uint seed)
+        private readonly IShotSelector selector;
+        public AiPolicy(DifficultySettings settings, AiTuning tuning, uint seed, IShotSelector selector = null)
         {
             Difficulty = settings.Difficulty; Settings = settings; this.tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
             // Reject the default struct, which has no valid skill threshold.
             if (settings.SkillStock < 1) throw new ArgumentException("Settings are required.");
             random = seed == 0 ? 0x6D2B79F5u : seed;
+            this.selector = selector;
         }
 
         private float Next()
@@ -77,6 +79,12 @@ namespace DigitalTennis.AI
             float targetX = state.OpponentPosition.X >= 0f ? -tuning.TargetWidth : tuning.TargetWidth;
             float facing = state.PlayerId == 0 ? 1f : -1f;
             float targetZ = facing * tuning.TargetDepth;
+            if (selector != null)
+            {
+                selector.Select(state, out float width, out float depth);
+                targetX = -facing * width * tuning.TargetWidth;
+                targetZ = facing * Numbers.Clamp(depth * tuning.TargetDepth, tuning.NetGap, BallPrediction.HalfLength);
+            }
             float dz = Math.Max(1f, (targetZ - state.BallPosition.Z) * facing);
             float dx = (targetX - state.BallPosition.X) * facing;
             float yaw = Numbers.Clamp((float)Math.Atan2(dx, dz), -tuning.Yaw * (float)Math.PI / 180f, tuning.Yaw * (float)Math.PI / 180f);
