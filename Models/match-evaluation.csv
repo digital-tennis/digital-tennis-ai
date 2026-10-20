@@ -1,0 +1,4 @@
+difficulty,cases,points,ai_points,scripted_point_share,ai_hits,ai_rejected,accepted_attempt_share,action_0,action_1,action_2,action_3,action_4,action_5
+Easy,3,40,13,0.325,31,0,1.0,0,0,0,16,0,15
+Medium,3,41,29,0.7073170731707317,72,0,1.0,0,0,0,26,0,46
+Hard,3,25,24,0.96,54,0,1.0,0,0,0,18,0,36

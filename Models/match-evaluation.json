@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "scope": "Unity SinglePlayerCourt; KOR vs JPN; 3 difficulties x 3 seeds; two service games per case; timeScale=4; scripted human fixture through ordinary hit validation. Point share is not human win rate or end-to-end training.",
+  "modelSha256": "3e6bcdc207315fc8dbd284bec82ca41727ce44ffbffc4917a030d8ac150fb4eb",
+  "gameplayHash": "03663e3fba0b190ec374104a6593261ab3dd210c2dd75d74197bf58b45e336f0",
+  "results": [
+    {
+      "points": 40,
+      "farPoints": 13,
+      "aiHits": 31,
+      "aiAttempts": 31,
+      "aiRejected": 0,
+      "learnedDecisions": 31,
+      "difficulty": "Easy",
+      "cases": 3,
+      "actions": [
+        0,
+        0,
+        0,
+        16,
+        0,
+        15
+      ],
+      "scriptedPointShare": 0.325,
+      "acceptedAttemptShare": 1.0
+    },
+    {
+      "points": 41,
+      "farPoints": 29,
+      "aiHits": 72,
+      "aiAttempts": 72,
+      "aiRejected": 0,
+      "learnedDecisions": 72,
+      "difficulty": "Medium",
+      "cases": 3,
+      "actions": [
+        0,
+        0,
+        0,
+        26,
+        0,
+        46
+      ],
+      "scriptedPointShare": 0.7073170731707317,
+      "acceptedAttemptShare": 1.0
+    },
+    {
+      "points": 25,
+      "farPoints": 24,
+      "aiHits": 54,
+      "aiAttempts": 54,
+      "aiRejected": 0,
+      "learnedDecisions": 54,
+      "difficulty": "Hard",
+      "cases": 3,
+      "actions": [
+        0,
+        0,
+        0,
+        18,
+        0,
+        36
+      ],
+      "scriptedPointShare": 0.96,
+      "acceptedAttemptShare": 1.0
+    }
+  ],
+  "limitations": [
+    "Nine short KOR/JPN scene cases against a scripted fixture; not human win rate.",
+    "Points within each case are correlated; no independent-sample confidence claim.",
+    "Difficulty ordering is measured, never forced by changing scores or tuning to these seeds.",
+    "PPO selects shot placement only; no movement/serve/skill end-to-end training.",
+    "Unity frame timing varies; fixed seeds do not promise bit-identical point totals."
+  ],
+  "gameCommit": "0393f1d396ca5278414b87c056056714672c3ed7",
+  "inputSha256": "fbd848bbb1fecb256ff0d0d43aa63cf3d083c1901829482a506ed18d12c1ef92"
+}

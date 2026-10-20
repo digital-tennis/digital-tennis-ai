@@ -4,7 +4,6 @@ import argparse
 import csv
 import hashlib
 import json
-import math
 from pathlib import Path
 
 LEVELS = ('Easy', 'Medium', 'Hard')
@@ -19,9 +18,11 @@ def summarize(report):
             raise ValueError('Missing SHA256 provenance: ' + key)
     rows = report.get('cases', [])
     if len(rows) != 9 or {(r['difficulty'], r['seed']) for r in rows} != {(d, s) for d in LEVELS for s in SEEDS}:
-        raise ValueError('Need exactly three distinct held-out seeds per difficulty')
+        raise ValueError('Need exactly three distinct fixed seeds per difficulty')
     totals = []
     for r in rows:
+        if r.get('near') != 'KOR' or r.get('far') != 'JPN':
+            raise ValueError('This evaluation cohort requires KOR vs JPN')
         for key in ('points', 'nearPoints', 'farPoints', 'nearHits', 'aiHits', 'aiAttempts', 'aiRejected', 'humanServes', 'aiServes', 'learnedDecisions'):
             if type(r.get(key)) is not int or r[key] < 0:
                 raise ValueError('Invalid count: ' + key)
@@ -43,7 +44,8 @@ def summarize(report):
                 limitations=['Nine short KOR/JPN scene cases against a scripted fixture; not human win rate.',
                              'Points within each case are correlated; no independent-sample confidence claim.',
                              'Difficulty ordering is measured, never forced by changing scores or tuning to these seeds.',
-                             'PPO selects shot placement only; no movement/serve/skill end-to-end training.'])
+                             'PPO selects shot placement only; no movement/serve/skill end-to-end training.',
+                             'Unity frame timing varies; fixed seeds do not promise bit-identical point totals.'])
 
 
 def main():
