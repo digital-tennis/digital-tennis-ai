@@ -5,5 +5,7 @@
   <ItemGroup>
     <None Include="../Runtime/Resources/DigitalTennisAI/placement-ppo.json" Link="placement-ppo.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../Models/placement-validation.json" Link="placement-validation.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../Runtime/Resources/DigitalTennisAI/full-match-ppo.json" Link="full-match-ppo.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../Runtime/Resources/DigitalTennisAI/full-match-parity.json" Link="full-match-parity.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
