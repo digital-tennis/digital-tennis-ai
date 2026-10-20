@@ -9,3 +9,7 @@ jobs:
         with:
           dotnet-version: '10.0.x'
       - run: dotnet run --project tests/DigitalTennis.AI.Checks.csproj --configuration Release
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m unittest discover -s tests -p 'test_*.py' -v

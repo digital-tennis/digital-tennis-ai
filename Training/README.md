@@ -64,3 +64,16 @@ seed20261019,65,536학습 단계와 겹치지 않는 seed의2,048상황에서 �
 학습 보고서에 seed·스텝·데이터/모델 해시·보상 정의·무작위 기준선·실제 경기 여부를 남긴다. 학습 도구의 설치 성공과 학습/게임 검증을 서로 대체하지 않는다.
 
 공식 참고: [SB3 PPO](https://stable-baselines3.readthedocs.io/en/v2.3.2/modules/ppo.html), [정책 네트워크](https://stable-baselines3.readthedocs.io/en/v2.3.2/guide/custom_policy.html), [Unity ML-Agents 설치](https://unity-technologies.github.io/ml-agents/Installation/).
+
+## 실제 Unity 경기 평가
+
+샷 배치 보상과 실제 경기를 구분한다. game 저장소에서 `bash tools/unity.sh test-ai-evaluation`을 실행하면 실제 SinglePlayerCourt에서 KOR/JPN,3난이도×3고정시드,사례별2서비스게임을 진행하고 `.work/ai-evaluation.json`을 쓴다. 상대편은 일정한 가상 사람 입력 fixture이고 포인트는 기존 공·규칙 이벤트에서만 발생한다. 각 난이도에서 AI의 서브·리턴·학습 판단이 실제로 있어야 통과한다.
+
+AI 저장소에서 다음으로 결과를 검증·집계한다. `--game-commit`에는 실제 검사한 게임 전체40자리 SHA를 쓴다.
+
+```sh
+python3 tools/evaluate-match-report.py /absolute/game/.work/ai-evaluation.json --game-commit TESTED_GAME_SHA --out .work/match-evaluation
+python3 -m unittest discover -s tests -p 'test_*.py' -v
+```
+
+집계기는9사례·서로 다른시드·양쪽서비스·점수합·시도/성공/거부합·학습액션6종의 합·모델/밸런스해시를 검사한다. 부분 실패·중복사례·비활성AI·손상된 집계는 거부한다. CSV/JSON에는 난이도별 포인트점유율·실제 타격·거부·액션분포를 남긴다. 난이도 순위를 억지로 맞추거나 자동으로 능력치를 수정하지 않는다. 짧은 고정대진이고 포인트 사이에 상관이 있으므로 사람 승률이나 독립표본 신뢰구간으로 제시하지 않는다. 실제 사람/15명전체의 장기 난이도 평가는 후속이다.
