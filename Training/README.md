@@ -108,3 +108,7 @@ python3 tools/train-ai-full-match.py --python <이 저장소의 pinned-venv-pyth
 PPO actor는 32→32→32→6 tanh MLP이며 `Runtime/Resources/DigitalTennisAI/full-match-ppo.json`으로 export한다. `FullMatchActor`는 netstandard2.1 독립 C# 추론이며 Python/UnityEngine/network가 필요 없다. `full-match-parity.json`의64개 휴대형 사례로 Python/Torch와 C# 정규화·logit·argmax를 비교한다. 기존 placement 모델과 inference를 삭제하지 않는다. 새 actor는 별도 opt-in 소비자가 사용할 수 있으며 이 단계에서 기본 Far 제품 모델을 교체하지 않는다.
 
 이동/서브/반응/타격 시점/forehand-backhand/스킬 사용과 안전 gate는 기존 실행기다. 모든 타격은 게임 SubmitInput을 통과한다. Reject를 숨기거나 score/ball/stock을 주입하지 않는다. 실제 학습 결과·Unity 테스트·raw trajectory·소스/모델/설정 hash는 게임 저장소 `docs/evidence/ai-full-match/training*`에 보존한다. checkpoint·venv·대형 로그는 `.work`에 두고 Git에서 제외한다. 자체 코드/모델은 Apache-2.0, 외부 라이선스는 기존 표기를 유지한다. NU40-DK+별도 외장 IMU, 최초12일/3명 계획을 유지하며 물리 장치/Windows/WAN 검증과 자기대전/재개/일반 Mac 창 검수는 이 단계 범위가 아니다.
+
+## 전체 경기 확장의 최신 상태
+
+[학습·self-play·평가·complete-state 재개와 측정 결과](full-match-delivery.md)가 2026-10-21 전체 확장의 현재 기준이다. 위 placement/최초 전체 경기 설명은 당시 실험 기록이다. Mac GPU 자동 검사는 통과했으나 일반 창 검수는 잠금으로 미완료다.

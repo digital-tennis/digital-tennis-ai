@@ -11,5 +11,6 @@ jobs:
       - run: dotnet run --project tests/DigitalTennis.AI.Checks.csproj --configuration Release
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.10'
+      - run: python3 -m pip install -r Training/requirements-lock.txt
       - run: python3 -m unittest discover -s tests -p 'test_*.py' -v
