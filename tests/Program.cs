@@ -210,6 +210,35 @@ static class Program
             var decision=ReachReaction(policy);Require(decision.ShouldSwing&&selector.Decisions==1,"learned return");
             policy.Decide(State(tick:100));Require(selector.Decisions==1,"duplicate inference for one ball");
         });
+        Check("full-match actor normalization and strict versions/shapes",()=>{
+            Require(FullMatchActor.Normalize(new float[32]).All(x=>x==0),"zero normalization");
+            foreach(var raw in new[]{new float[31],Enumerable.Repeat(float.NaN,32).ToArray(),Enumerable.Repeat(float.PositiveInfinity,32).ToArray()}) {
+                bool rejected=false;try{FullMatchActor.Normalize(raw);}catch(ArgumentException){rejected=true;}Require(rejected,"invalid observation accepted");
+            }
+            bool invalid=false;try{new FullMatchActor(new FullMatchModelData());}catch(ArgumentException){invalid=true;}Require(invalid,"unknown version accepted");
+            for(int i=0;i<6;i++){FullMatchActor.Placement(i,out float w,out float d);Require(w>=-1&&w<=1&&d>=.2f&&d<=1.4f,"placement range");}
+        });
+        var fullPath=Path.Combine(AppContext.BaseDirectory,"full-match-ppo.json");
+        Check("full-match C# logits and normalization match Python/Torch on 64 portable cases",()=>{
+            var data=JsonSerializer.Deserialize<FullMatchModelData>(File.ReadAllText(fullPath),new JsonSerializerOptions{IncludeFields=true});
+            var actor=new FullMatchActor(data);
+            using var parity=JsonDocument.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"full-match-parity.json")));
+            int count=0;
+            foreach(var row in parity.RootElement.GetProperty("cases").EnumerateArray()){
+                var raw=row.GetProperty("raw").EnumerateArray().Select(x=>x.GetSingle()).ToArray();
+                var obs=row.GetProperty("observation").EnumerateArray().Select(x=>x.GetSingle()).ToArray();
+                var expected=row.GetProperty("logits").EnumerateArray().Select(x=>x.GetSingle()).ToArray();
+                var actual=actor.Logits(obs);var normalized=FullMatchActor.Normalize(raw);
+                for(int i=0;i<32;i++)Near(normalized[i],obs[i],0.000001f);
+                for(int i=0;i<6;i++)Near(actual[i],expected[i],0.00001f);
+                Require(actor.Predict(obs)==row.GetProperty("action").GetInt32(),"portable action");count++;
+            }
+            Require(count==64,"parity case count");
+            data.w1[0]=float.NaN;bool rejected=false;try{new FullMatchActor(data);}catch(ArgumentException){rejected=true;}Require(rejected,"NaN weight accepted");
+            foreach(var x in new[]{new float[31],Enumerable.Repeat(float.NaN,32).ToArray(),Enumerable.Repeat(3f,32).ToArray()}){
+                rejected=false;try{actor.Predict(x);}catch(ArgumentException){rejected=true;}Require(rejected,"bad model input accepted");
+            }
+        });
         Console.WriteLine($"ALL {passed} CHECKS PASSED");
     }
 }

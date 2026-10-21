@@ -91,3 +91,24 @@ python3 -m unittest discover -s tests -p 'test_*.py' -v
 학습 판단157회와 액션집계157회가 일치했다. 이 코호트는 짧은좌/우 코너 액션3/5만 선택했다(60/97회). 전체6행동의 일반화·다른15명대진·사람승률을 입증하지 않는다. 난이도 차이는 관찰됐지만 이 결과에 맞춰 능력치를 임의 조절하지 않았다. 사람 플레이와 장기/다양한 대진을 통한 튜닝이 다음 단계다.
 
 [원시 scene 결과](../Models/match-scenes.json), [검증 집계](../Models/match-evaluation.json), [CSV](../Models/match-evaluation.csv)를 함께 보존한다. 최초9사례 묶음은7사례 후 기본180초 제한에서 중단됐다. 전용 검사의제한을1200초로 늘리고 사례별중간저장을 추가한 재실행에서9사례를 모두 통과했다. 각 서비스게임의100초 제한과 타격/점수 검사는 완화하지 않았다. Unity 프레임 시각 때문에 시드가 같아도 포인트 수의 비트단위 일치를 보장하지 않는다.
+
+## 실제 Unity 전체 경기 학습 (2026-10-21)
+
+기존 `train.py`/placement 모델은 한 샷 환경이므로 전체 경기 학습의 증거가 아니다. 새 `full_match.py`의 `UnityMatch`는 게임 저장소의 명시적 PlayMode `FullMatchTrainingTests.AuthoritativeGymBridge`에 loopback으로 연결하는 Gymnasium 환경이다. Python은 물리·점수·종료를 계산하지 않는다. 실제 `SinglePlayerCourt`의 authoritative BallFlight와 기본 best-of-3/6게임/6–6 7점 타이브레이크 규칙이 점수와 종료를 만든다. 완료 전 reset을 거절한다. 훈련은 Near 샷 배치 전술이며 Far는 고정된 기존 번들 placement 모델이다.
+
+`full-match.csv`는 steps=65536, seed=20261021, gamma=.995 및 PPO/reward 하이퍼파라미터를 검증해 읽는다. 목표는 >=4 rollout update와 >=2 실제 완료 매치이며 부족하면 rollout 단위로 연장한다. 개선 임계치나 사람 승률을 주장하지 않는다. 보상 버전1은 실제 본인−상대 포인트·완료 게임·세트·최종 승패와 거절 수 변화다. 액션 버전1은 폭 {-1,0,+1} × 깊이 {.55,1}이다. 관측 버전2는 32개 경기/공/선수 상태이며 `FullMatchActor.Fields`/Normalize가 계약이다. 고정 normalization은 통계 업데이트 없이 [-2,2]로 clamp한다.
+
+```sh
+python -m unittest discover -s tests -p test_full_match.py
+dotnet run --project tests/DigitalTennis.AI.Checks.csproj --configuration Release
+# 게임 저장소에서 Unity와 trainer를 함께 시작:
+python3 tools/train-ai-full-match.py --python <이 저장소의 pinned-venv-python> --ai <이 저장소 checkout>
+```
+
+PPO actor는 32→32→32→6 tanh MLP이며 `Runtime/Resources/DigitalTennisAI/full-match-ppo.json`으로 export한다. `FullMatchActor`는 netstandard2.1 독립 C# 추론이며 Python/UnityEngine/network가 필요 없다. `full-match-parity.json`의64개 휴대형 사례로 Python/Torch와 C# 정규화·logit·argmax를 비교한다. 기존 placement 모델과 inference를 삭제하지 않는다. 새 actor는 별도 opt-in 소비자가 사용할 수 있으며 이 단계에서 기본 Far 제품 모델을 교체하지 않는다.
+
+이동/서브/반응/타격 시점/forehand-backhand/스킬 사용과 안전 gate는 기존 실행기다. 모든 타격은 게임 SubmitInput을 통과한다. Reject를 숨기거나 score/ball/stock을 주입하지 않는다. 실제 학습 결과·Unity 테스트·raw trajectory·소스/모델/설정 hash는 게임 저장소 `docs/evidence/ai-full-match/training*`에 보존한다. checkpoint·venv·대형 로그는 `.work`에 두고 Git에서 제외한다. 자체 코드/모델은 Apache-2.0, 외부 라이선스는 기존 표기를 유지한다. NU40-DK+별도 외장 IMU, 최초12일/3명 계획을 유지하며 물리 장치/Windows/WAN 검증과 자기대전/재개/일반 Mac 창 검수는 이 단계 범위가 아니다.
+
+## 전체 경기 확장의 최신 상태
+
+[학습·self-play·평가·complete-state 재개와 측정 결과](full-match-delivery.md)가 2026-10-21 전체 확장의 현재 기준이다. 위 placement/최초 전체 경기 설명은 당시 실험 기록이다. Mac GPU 자동 검사는 통과했으나 일반 창 검수는 잠금으로 미완료다.

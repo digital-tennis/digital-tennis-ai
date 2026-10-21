@@ -99,3 +99,9 @@ UPM 이름은 `com.digital-tennis.ai`입니다. Unity에서는 Git 패키지를 
 ## 라이선스
 
 직접 작성한 코드·문서는 [Apache-2.0](LICENSE)입니다. [NOTICE](NOTICE)와 [외부 코드 고지](THIRD_PARTY_NOTICES.md)를 함께 확인하세요.
+
+실제 Unity 전체 경기 Gym/PPO와 별도 C# actor는 [Training/README.md](Training/README.md#실제-unity-전체-경기-학습-2026-10-21)를 참조한다. 기존 한 샷 placement 결과와 구분하며 전체 경기 학습 증거는 게임 저장소 `docs/evidence/ai-full-match/training.json`에 기록한다.
+
+## 전체 경기 확장의 최신 상태
+
+[학습·self-play·평가·complete-state 재개와 측정 결과](Training/full-match-delivery.md)가 2026-10-21 전체 확장의 현재 기준이다. 위 placement/최초 전체 경기 설명은 당시 실험 기록이다. Mac GPU 자동 검사는 통과했으나 일반 창 검수는 잠금으로 미완료다.

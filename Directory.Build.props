@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup>
+    <!-- Unity must never import standalone .NET build DLLs as package plugins. -->
+    <BaseOutputPath>$(MSBuildThisFileDirectory).work/bin/$(MSBuildProjectName)/</BaseOutputPath>
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory).work/obj/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildThisFileDirectory).work/**</DefaultItemExcludes>
+  </PropertyGroup>
+</Project>
